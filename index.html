@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tunez</title>
+
+    <!--loading AngularJS-->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.min.js"></script>
+    <!-- ui-router lib-->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
+    <script src="app.js"></script>
+
+    <!--Style -->
+    <script src="https://use.fontawesome.com/d4af7f078c.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="style.css" rel="stylesheet">
+
+
+</head>
+
+
+<script type="text/ng-template" id="/home.html">
+    <div class="page-header">
+        <h1>Fresh Tunes</h1>
+    </div>
+    <span>
+        <a href="#/songs/{{$index}}">Comments</a>
+    </span>
+
+    <!--List of new tunes-->
+    <!--The ng-repeat directive iterates through song in our app (like python 'for in') -->
+    <!-- orderBy is a built in filter, the '|' symbol seperates commands -->
+    <div class="list-group song-posts" ng-repeat="tune in songs | orderBy: '-upbeats'">
+        <div class="list-group-item song-post">
+            <!-- upbeat button -->
+            <!--pass (reference) tune post to update upbeats when music icon is clicked -->
+            <span class="fa-stack">
+            <span class="fa fa-square-o fa-stack-2x"></span>
+            <span class="fa fa-heart fa-stack-1x" ng-click="addUpbeat(tune)"></span>
+            </span>
+
+            <span class="badge">UpBeats: {{tune.upbeats}}</span>
+
+            <!-- show url if posted else hide-->
+            <a target="_blank" ng-show="tune.link" href="{{tune.link}}">
+                {{tune.title}}
+            </a>
+            <span ng-hide="tune.link">
+            {{tune.title}}
+            </span>
+        </div>
+    </div>
+
+    <!-- form to add new song -->
+    <form class="new-song" ng-submit="addSong()">
+        <h2 id="add-song-title" class="page-header">Add New Tune</h2>
+
+        <div class="form-group tune-title">
+            <input type="text" placeholder="Tune Title" ng-model="title"></input>
+        </div>
+        <div class="form-group">
+            <input type="text" placeholder="Link" ng-model="link"></input>
+        </div>
+        <button class="btn btn-default share-tune-btn" type="submit">Share Tune</button>
+    </form>
+</script>
+
+<script type="text/ng-template" id="/songs.html">
+    <div class="page-header">
+        <h3>
+      <a ng-show="tune.link" href="{{tune.link}}">
+        {{tune.title}}
+      </a>
+      <span ng-hide="post.link">
+        {{tune.title}}
+      </span>
+    </h3>
+    </div>
+
+    <div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
+        <span class="fa fa-square-o fa-stack-2x"></span>
+        <span class="fa fa-heart fa-stack-1x" ng-click="addUpbeat(comment)"></span> {{comment.upbeats}} - by {{comment.author}}
+        <span style="font-size:20px; margin-left:10px;">
+      {{comment.body}}
+    </span>
+    </div>
+</script>
+
+<!-- Link the view and controller -->
+
+<body ng-app="tunez" class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <ui-view></ui-view>
+        </div>
+    </div>
+</body>
+
+</html>
