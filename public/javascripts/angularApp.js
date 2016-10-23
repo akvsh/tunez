@@ -13,7 +13,13 @@ function ($stateProvider, $urlRouterProvider) {
         $stateProvider.state('home', {
             url: '/home',
             templateUrl: '/home.html', //inserted into ui-view when this state is active
-            controller: 'mainCtrl'
+            controller: 'mainCtrl',
+            resolve: { // custom state data
+                //query backend for all songs everytime we enter home state
+                postPromise: ['songs', function (songs) {
+                    return songs.getAll();
+                }]
+            }
         })
 
         //for each post
@@ -34,7 +40,7 @@ function ($stateProvider, $urlRouterProvider) {
 //Provider: only service you can pass to .config() function
 //TLDR: Very subtle differences between the three
 //made because usually the controller goes out of scope and data cannot be accessed from other directives or controllers
-app.factory('songs', [function () {
+app.factory('songs', ['$http', function ($http) {
     //create object which has song posts array. Object(o) is returned and now exposed to other Angular modules
     var o = {
         songs: [
@@ -60,6 +66,29 @@ app.factory('songs', [function () {
             }
         ]
     }
+
+    o.getAll = function () {
+        //GET request to /songs and then run function after request is successfully returned
+        return $http.get('/songs').success(function (data) {
+            //deep copy song posts to our o.songs array and updates UI
+            angular.copy(data, o.songs);
+        });
+    };
+
+    //when creating new song post, send a put request and after succest add to our songs array
+    o.create = function (song) {
+        return $http.post('/songs', post).success(function (data) {
+            o.songs.push(data);
+        });
+    };
+
+    //request for upbeating a song post
+    o.upbeat = function (song) {
+        return $http.put('/songs/' + song._id + '/upbeat').success(function (data) {
+            song.upbeats += 1;
+        });
+    };
+
     return o;
 }]);
 
@@ -86,31 +115,18 @@ app.controller('mainCtrl', [
                 return;
             }
 
-            $scope.songs.push({
-                //getting title from our app/object
+            songs.create({
                 title: $scope.title,
                 link: $scope.link,
-                upbeats: 0,
-                comments: [
-                    {
-                        author: 'Joe',
-                        body: 'Great song!',
-                        upbeats: 0
-                    },
-                    {
-                        author: 'Bob',
-                        body: 'I love that beat!',
-                        upbeats: 0
-                    }
-                ]
             });
+
             //clear name and link after
             $scope.title = "";
             $scope.link = "";
         };
 
-        $scope.addUpbeat = function (tune) {
-            tune.upbeats++;
+        $scope.addUpbeat = function (song) {
+            songs.upbeat(song);
         };
 }]);
 

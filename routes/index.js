@@ -4,8 +4,10 @@ var mongoose = require('mongoose');
 var Song = mongoose.model('Song');
 var Comment = mongoose.model('Comment');
 
+
 //get all of the song posts (the front page essentially)
 router.get('/songs', function (req, res, next) {
+
     //query the db for all song posts
     Song.find(function (err, posts) {
         if (err) {
@@ -30,9 +32,11 @@ router.post('/songs', function (req, res, next) {
     });
 });
 
-
-router.param('id', function (req, res, next, id) {
-    Song.findById(id, function (err, song) {
+//the song id param for url
+router.param('song', function (req, res, next, id) {
+    //query for the specific song post
+    var query = Song.findById(id);
+    query.exec(function (err, song) {
         if (err) {
             return next(err);
         }
@@ -41,35 +45,40 @@ router.param('id', function (req, res, next, id) {
             return next(new Error('cannot find song post'));
         }
         req.song = song;
-        console.log(req.song);
         return next();
     });
 });
 
-router.param('commentId', function (req, res, next, commentId) {
-    Song.comments.findById(commentId, function (err, comment) {
+//comment param id for specific song post
+router.param('comment', function (req, res, next, id) {
+    //query for the specific comment
+    var query = Comment.findById(id);
+    query.exec(function (err, comment) {
         if (err) {
             return next(err);
         }
         //if the comment doesn't exist
         if (!comment) {
-            return next(new Error('cannot find song post'));
+            return next(new Error('cannot find comment'));
         }
         req.comment = comment;
-        console.log(req.comment);
         return next();
     });
 });
 
 
 //getting single song post data
-router.get('/songs/:id', function (req, res) {
-    res.json(req.song);
+router.get('/songs/:song', function (req, res) {
+    req.song.populate('comments', function (err, song) {
+        if (err) {
+            return next(err);
+        }
+        res.json(req.song);
+    });
 });
 
-
 //upbeat song post
-router.put('/songs/:id/upbeat', function (req, res, next) {
+router.put('/songs/:song/upbeat', function (req, res, next) {
     req.song.upbeat(function (err, song) {
         if (err) {
             return next(err);
@@ -78,12 +87,12 @@ router.put('/songs/:id/upbeat', function (req, res, next) {
     });
 });
 
-//getting all comments of a certain song post
-router.post('/songs/:id/comments', function (req, res, next) {
-    console.log(req.body);
+//add new comment to a certain song post
+router.post('/songs/:song/comments', function (req, res, next) {
+
     var comment = new Comment(req.body);
     //set comment to the request
-    comment.songPost = req.songPost;
+    comment.song = req.song;
 
     //add it to our db and save for this song post
     comment.save(function (err, comment) {
@@ -104,12 +113,12 @@ router.post('/songs/:id/comments', function (req, res, next) {
 });
 
 //upbeat a specific comment on a specific song post
-router.put('/songs/:id/comments/:commentId/upvote', function (req, res, next) {
-    req.song.upbeat(function (err, song) {
+router.put('/songs/:song/comments/:comment/upbeat', function (req, res, next) {
+    req.comment.upbeat(function (err, comment) {
         if (err) {
             return next(err);
         }
-        res.json(song);
+        res.json(comment);
     });
 });
 
