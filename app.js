@@ -1,115 +1,60 @@
-//main app
-//external modules (like ui-router) are added as a dependancy here
-var app = angular.module('tunez', ['ui.router']);
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
-app.config([
-'$stateProvider',
-'$urlRouterProvider',
-function ($stateProvider, $urlRouterProvider) {
-        // set up a home route (/home) with name,url,template url
-        //also set a controller to control this state
-        $stateProvider
-            .state('home', {
-                url: '/home',
-                templateUrl: '/home.html',
-                controller: 'mainCtrl'
-            })
+var routes = require('./routes/index');
+var users = require('./routes/users');
 
-        //for each post
-        .state('songs', {
-            url: '/songs/{id}',
-            templateUrl: '/songs.html',
-            controller: 'songCtrl'
-        });
-        //got to home template if you receive undefined url
-        $urlRouterProvider.otherwise('home');
-}]);
+var app = express();
 
-// service (declared similarly to controllers). Both service/factory are instances of a provider
-//Factory: create object -> add properties -> return object
-//Service: instance of object (use 'new') -> add properties to this -> return this
-//Provider: only service you can pass to .config() function
-//TLDR: Very subtle differences between the three
-//made because usually the controller goes out of scope and data cannot be accessed from other directives or controllers
-app.factory('songs', [function () {
-    //create object which has song posts array. Object(o) is returned and now exposed to other Angular modules
-    var o = {
-        songs: []
-    }
-    return o;
-}]);
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
-//creating a controller called mainController
-//no persisten data (should be in model)
-//controller should be 'thin' normally, main logic and data should be taken care of in service
-app.controller('mainCtrl', [
-    '$scope', //the app object ('this')
-    '$stateParams', //object that stores info about URL
-    'songs',
-    //scope is an object that binds to DOM element where you apply controller
-    //Think of it like C++ Object ctor with this.name, this.age etc.
-    function ($scope, $stateParams, songs) {
-        //any changes to $scope.songs now stored in service & available to other modules that inject 'songs' service
-        //injecting: adding name of service to controller where we want to access it
-        // ex. [$scope,songs <---INJECTION]
-        $scope.songs = songs.songs[$stateParams.id];
-        /*
-        //list of computers
-        $scope.songs = [
-            {
-                title: 'Fido - For My Dogs',
-                upbeats: 3
-            },
-            {
-                title: 'Nil - Plus one',
-                upbeats: 0
-            },
-            {
-                title: 'Drake - Model Views Controlla',
-                upbeats: 6
-            },
-            {
-                title: 'The Weeknd - The Hills',
-                upbeats: 5
-            },
-            {
-                title: 'Vitas - Opera',
-                upbeats: 17
-            }
-        ];
-        */
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-        $scope.addSong = function () {
+app.use('/', routes);
+app.use('/users', users);
 
-            //Check if user didn't submit title or submitted empty string, then alert them to enter title
-            if (!$scope.title || $scope === '') {
-                alert("Unable to submit tune. Please enter a song title!");
-                return;
-            }
-            $scope.songs.push({
-                //getting title from our app/object
-                title: $scope.title,
-                link: $scope.link,
-                upbeats: 0
-                comments: [
-                    {
-                        author: 'Joe',
-                        body: 'Great song!',
-                        upvotes: 0
-                    },
-                    {
-                        author: 'Bob',
-                        body: 'I love that beat!',
-                        upvotes: 0
-                    }
-  ]
-            });
-            //clear name and link after
-            $scope.title = "";
-            $scope.link = "";
-        };
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
 
-        $scope.addUpbeat = function (tune) {
-            tune.upbeats++;
-        };
-}]);
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
+    });
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
+});
+
+
+module.exports = app;
