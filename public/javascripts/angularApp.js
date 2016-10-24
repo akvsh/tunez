@@ -10,23 +10,30 @@ function ($stateProvider, $urlRouterProvider) {
         //also set a controller to control this state
 
         //home page with all the posts      
-        $stateProvider.state('home', {
-            url: '/home',
-            templateUrl: '/home.html', //inserted into ui-view when this state is active
-            controller: 'mainCtrl',
-            resolve: { // custom state data
-                //query backend for all songs everytime we enter home state
-                postPromise: ['songs', function (songs) {
-                    return songs.getAll();
-                }]
-            }
-        })
+        $stateProvider
+            .state('home', {
+                url: '/home',
+                templateUrl: '/home.html', //inserted into ui-view when this state is active
+                controller: 'mainCtrl',
+                resolve: { // custom state data
+                    //query backend for all songs everytime we enter home state
+                    postPromise: ['songs', function (songs) {
+                        return songs.getAll();
+                    }]
+                }
+            })
 
         //for each post
         .state('songs', {
             url: '/songs/{id}', //songs + url parameter (id) for each id
             templateUrl: '/songs.html', //inserted into ui-view when this state is active
-            controller: 'songsCtrl'
+            controller: 'songsCtrl',
+            resolve: {
+                //query for song post with the requested id everytime we enter the /songs/id state
+                post: ['$stateParams', 'songs', function ($stateParams, songs) {
+                    return songs.get($stateParams.id);
+                }]
+            }
         });
 
         //got to home template if you receive undefined url
@@ -43,29 +50,8 @@ function ($stateProvider, $urlRouterProvider) {
 app.factory('songs', ['$http', function ($http) {
     //create object which has song posts array. Object(o) is returned and now exposed to other Angular modules
     var o = {
-        songs: [
-            {
-                title: 'Tame Impala - LoveParanoia',
-                upbeats: 3
-            },
-            {
-                title: 'Nirvana - Smells Like Teenage Spirit',
-                upbeats: 0
-            },
-            {
-                title: 'Drake - Model Views Controlla',
-                upbeats: 6
-            },
-            {
-                title: 'The Weeknd - The Hills',
-                upbeats: 5
-            },
-            {
-                title: 'Vitas - Opera',
-                upbeats: 17
-            }
-        ]
-    }
+        songs: []
+    };
 
     o.getAll = function () {
         //GET request to /songs and then run function after request is successfully returned
@@ -75,17 +61,35 @@ app.factory('songs', ['$http', function ($http) {
         });
     };
 
-    //when creating new song post, send a put request and after succest add to our songs array
+    //when creating new song post, send a put request and after succes add to our songs array
     o.create = function (song) {
-        return $http.post('/songs', post).success(function (data) {
+        return $http.post('/songs', song).success(function (data) {
             o.songs.push(data);
         });
     };
 
-    //request for upbeating a song post
+    //request for upbeating a song post and after success increment song upbeats
     o.upbeat = function (song) {
         return $http.put('/songs/' + song._id + '/upbeat').success(function (data) {
             song.upbeats += 1;
+        });
+    };
+
+    o.get = function (id) {
+        //get single song post from server (async, the data returned once request is complete)
+        return $http.get('/songs/' + id).then(function (res) {
+            return res.data;
+        });
+    };
+
+    //add new comment to song post
+    o.addComment = function (id, comment) {
+        return $http.post('/songs/' + id + '/comments', comment);
+    };
+
+    o.upbeatComment = function (song, comment) {
+        return $http.put('/songs/' + song._id + '/comments/' + comment._id + '/upbeat').success(function (data) {
+            comment.upbeats += 1;
         });
     };
 
@@ -103,12 +107,10 @@ app.controller('mainCtrl', [
     function ($scope, songs) {
         //any changes to $scope.songs now stored in service & available to other modules that inject 'songs' service
         //injecting: adding name of service to controller where we want to access it. ex. [$scope,songs <---INJECTION]
-
         $scope.songs = songs.songs;
 
 
         $scope.addSong = function () {
-
             //Check if user didn't submit title or submitted empty string, then alert them to enter title
             if (!$scope.title || $scope.title === '') {
                 alert("Unable to submit tune. Please enter a song title!");
@@ -117,7 +119,7 @@ app.controller('mainCtrl', [
 
             songs.create({
                 title: $scope.title,
-                link: $scope.link,
+                link: $scope.link, //TODO: check for valid link submissions
             });
 
             //clear name and link after
@@ -125,37 +127,39 @@ app.controller('mainCtrl', [
             $scope.link = "";
         };
 
-        $scope.addUpbeat = function (song) {
+        $scope.upbeat = function (song) {
             songs.upbeat(song);
         };
 }]);
 
 app.controller('songsCtrl', [
     '$scope', //the app object ('this')
-    '$stateParams', //object that stores info about URL
     'songs',
-    function ($scope, $stateParams, songs) {
-        //index is post id FOR NOW
-        // we use the stateparam from the url (/:id) to get the id
-        $scope.songs = songs.songs[$stateParams.id];
+    'song',
+    function ($scope, songs, song) {
+        $scope.song = song;
 
         $scope.addComment = function () {
+
             if (!$scope.body || $scope.body === '') {
                 alert("Don't talk much do ya? No comment was posted, please try again.");
                 return;
             }
 
-            $scope.song.comments.push({
+            songs.addComment(song._id, {
                 body: $scope.body,
-                author: 'user', //anon user for now, should later be logged in user from db
-                upbeats: 0
+                author: 'user', //anon user for now, add auth l8r
+            }).success(function (comment) {
+                $scope.song.comments.push(comment);
             });
 
             $scope.body = ''; //clear the body after
         };
 
-        $scope.addUpbeat = function (comment) {
-            comment.upbeats++;
+        //upbeat given comment
+        //todo: add downbeat
+        $scope.upbeat = function (comment) {
+            songs.upbeatComment(song, comment);
         };
 
 }]);

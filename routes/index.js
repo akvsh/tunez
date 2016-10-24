@@ -5,6 +5,11 @@ var Song = mongoose.model('Song');
 var Comment = mongoose.model('Comment');
 
 
+// home page
+router.get('/', function (req, res, next) {
+    res.render('index');
+});
+
 //get all of the song posts (the front page essentially)
 router.get('/songs', function (req, res, next) {
 
