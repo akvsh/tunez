@@ -1,6 +1,6 @@
 //main app
 //external modules (like ui-router) are added as a dependancy here
-var app = angular.module('tunez', ['ui.router']);
+var app = angular.module('tunez', ['ui.router'])
 
 app.config([
 '$stateProvider', //refers to place in app (in terms of UI/navigation)
@@ -30,7 +30,7 @@ function ($stateProvider, $urlRouterProvider) {
             controller: 'songsCtrl',
             resolve: {
                 //query for song post with the requested id everytime we enter the /songs/id state
-                post: ['$stateParams', 'songs', function ($stateParams, songs) {
+                song: ['$stateParams', 'songs', function ($stateParams, songs) {
                     return songs.get($stateParams.id);
                 }]
             }
@@ -138,7 +138,7 @@ app.controller('songsCtrl', [
     'song',
     function ($scope, songs, song) {
         $scope.song = song;
-
+        console.log($scope.song);
         $scope.addComment = function () {
 
             if (!$scope.body || $scope.body === '') {
@@ -150,6 +150,7 @@ app.controller('songsCtrl', [
                 body: $scope.body,
                 author: 'user', //anon user for now, add auth l8r
             }).success(function (comment) {
+                console.log(comment);
                 $scope.song.comments.push(comment);
             });
 

@@ -8,9 +8,11 @@
 
     <!--loading AngularJS-->
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.js"></script>
-
     <!-- ui-router lib-->
+    <script src="//unpkg.com/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <!--
     <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
+-->
     <script src="/javascripts/angularApp.js"></script>
 
 
@@ -18,7 +20,7 @@
     <script src="https://use.fontawesome.com/d4af7f078c.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -137,11 +139,11 @@
     <script type="text/ng-template" id="/songs.html">
         <div class="page-header">
             <h3>
-                <a ng-show="tune.link" href="{{tune.link}}">
-                   {{tune.title}}
+                <a ng-show="song.link" href="{{song.link}}">
+                   {{song.title}}
                 </a>
-                <span ng-hide="tune.link">
-                  {{tune.title}}
+                <span ng-hide="song.link">
+                  {{song.title}}
                 </span>
                 <br>
                 <br>
@@ -149,7 +151,7 @@
             </h3>
         </div>
 
-        <div ng-repeat="comment in songs.comments | orderBy:'-upbeats'">
+        <div ng-repeat="comment in song.comments | orderBy:'-upbeats'">
             <h4>{{comment.author}}</h4>
             <span class="fa-stack">
             <span class="fa fa-square-o fa-stack-2x"></span>
