@@ -9,18 +9,17 @@
     <!--loading AngularJS-->
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.js"></script>
     <!-- ui-router lib-->
-    <script src="//unpkg.com/angular-ui-router/release/angular-ui-router.min.js"></script>
-    <!--
     <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
--->
     <script src="/javascripts/angularApp.js"></script>
 
 
     <!--Style -->
     <script src="https://use.fontawesome.com/d4af7f078c.js"></script>
-
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <!--
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/appStyle.css">
+    -->
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -82,7 +81,6 @@
             border-bottom-color: black;
         }
     </style>
-
 </head>
 <!-- Link the view and controller -->
 
@@ -103,10 +101,13 @@
                 <!-- upbeat button -->
                 <!--pass (reference) tune post to update upbeats when music icon is clicked -->
                 <span class="fa-stack">
-            <span class="fa fa-square-o fa-stack-2x"></span>
-                <span class="fa fa-heart fa-stack-1x" ng-click="upbeat(song)"></span>
+                <span class="fa fa-square-o fa-stack-2x"></span>
+                <span class="fa fa-volume-up fa-stack-1x" ng-click="upbeat(song)"></span>
                 </span>
-
+                <span class="fa-stack">
+                <span class="fa fa-square-o fa-stack-2x"></span>
+                <span class="fa fa-volume-down fa-stack-1x" ng-click="downbeat(song)"></span>
+                </span>
                 <span class="badge">UpBeats: {{song.upbeats}}</span>
                 <!-- show url if posted else hide-->
                 <a target="_blank" ng-show="song.link" href="{{song.link}}">
@@ -139,7 +140,7 @@
     <script type="text/ng-template" id="/songs.html">
         <div class="page-header">
             <h3>
-                <a ng-show="song.link" href="{{song.link}}">
+                <a target="_blank" ng-show="song.link" href="{{song.link}}">
                    {{song.title}}
                 </a>
                 <span ng-hide="song.link">
@@ -155,7 +156,11 @@
             <h4>{{comment.author}}</h4>
             <span class="fa-stack">
             <span class="fa fa-square-o fa-stack-2x"></span>
-            <span class="fa fa-heart fa-stack-1x" ng-click="upbeat(comment)"></span>
+            <span class="fa fa-volume-up fa-stack-1x" ng-click="upbeat(comment)"></span>
+            </span>
+            <span class="fa-stack">
+            <span class="fa fa-square-o fa-stack-2x"></span>
+            <span class="fa fa-volume-down fa-stack-1x" ng-click="downbeat(comment)"></span>
             </span>
             <span class="badge"> UpBeats: {{comment.upbeats}}</span>
             <br>

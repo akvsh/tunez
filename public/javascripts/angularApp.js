@@ -1,6 +1,6 @@
 //main app
 //external modules (like ui-router) are added as a dependancy here
-var app = angular.module('tunez', ['ui.router'])
+var app = angular.module('tunez', ['ui.router']);
 
 app.config([
 '$stateProvider', //refers to place in app (in terms of UI/navigation)
@@ -68,10 +68,17 @@ app.factory('songs', ['$http', function ($http) {
         });
     };
 
-    //request for upbeating a song post and after success increment song upbeats
+    //request for upbeating a song post and after success increment song upbeats in view
     o.upbeat = function (song) {
         return $http.put('/songs/' + song._id + '/upbeat').success(function (data) {
             song.upbeats += 1;
+        });
+    };
+
+    //request for downbeating a song post and after success decrement song upbeats in view
+    o.downbeat = function (song) {
+        return $http.put('/songs/' + song._id + '/downbeat').success(function (data) {
+            song.upbeats -= 1;
         });
     };
 
@@ -90,6 +97,12 @@ app.factory('songs', ['$http', function ($http) {
     o.upbeatComment = function (song, comment) {
         return $http.put('/songs/' + song._id + '/comments/' + comment._id + '/upbeat').success(function (data) {
             comment.upbeats += 1;
+        });
+    };
+
+    o.downbeatComment = function (song, comment) {
+        return $http.put('/songs/' + song._id + '/comments/' + comment._id + '/downbeat').success(function (data) {
+            comment.upbeats -= 1;
         });
     };
 
@@ -117,9 +130,11 @@ app.controller('mainCtrl', [
                 return;
             }
 
+            //add new song post
             songs.create({
                 title: $scope.title,
                 link: $scope.link, //TODO: check for valid link submissions
+                upbeats: 0
             });
 
             //clear name and link after
@@ -127,8 +142,14 @@ app.controller('mainCtrl', [
             $scope.link = "";
         };
 
+        //upbeat song post
         $scope.upbeat = function (song) {
             songs.upbeat(song);
+        };
+
+        //downbeat song post
+        $scope.downbeat = function (song) {
+            songs.downbeat(song);
         };
 }]);
 
@@ -158,9 +179,13 @@ app.controller('songsCtrl', [
         };
 
         //upbeat given comment
-        //todo: add downbeat
         $scope.upbeat = function (comment) {
             songs.upbeatComment(song, comment);
+        };
+
+        //downbeat given comment
+        $scope.downbeat = function (comment) {
+            songs.downbeatComment(song, comment);
         };
 
 }]);

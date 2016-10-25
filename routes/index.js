@@ -10,6 +10,7 @@ router.get('/', function (req, res, next) {
     res.render('index');
 });
 
+
 //get all of the song posts (the front page essentially)
 router.get('/songs', function (req, res, next) {
 
@@ -20,7 +21,7 @@ router.get('/songs', function (req, res, next) {
             return next(err);
         }
         //json response of song posts
-        res.json(posts)
+        res.json(posts);
     });
 });
 
@@ -92,6 +93,16 @@ router.put('/songs/:song/upbeat', function (req, res, next) {
     });
 });
 
+//downbeat song post
+router.put('/songs/:song/downbeat', function (req, res, next) {
+    req.song.downbeat(function (err, song) {
+        if (err) {
+            return next(err);
+        }
+        res.json(song);
+    });
+});
+
 //add new comment to a certain song post
 router.post('/songs/:song/comments', function (req, res, next) {
 
@@ -120,6 +131,16 @@ router.post('/songs/:song/comments', function (req, res, next) {
 //upbeat a specific comment on a specific song post
 router.put('/songs/:song/comments/:comment/upbeat', function (req, res, next) {
     req.comment.upbeat(function (err, comment) {
+        if (err) {
+            return next(err);
+        }
+        res.json(comment);
+    });
+});
+
+//downbeat a specific comment on a specific song post
+router.put('/songs/:song/comments/:comment/downbeat', function (req, res, next) {
+    req.comment.downbeat(function (err, comment) {
         if (err) {
             return next(err);
         }

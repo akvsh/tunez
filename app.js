@@ -1,10 +1,21 @@
+/*
+app.js
+import server files
+import modules
+open connection to our db (tunez)
+*/
+//middleware/routing [server side MVC framework for node]
 var express = require('express');
+//for path manipulation
 var path = require('path');
 var favicon = require('serve-favicon');
+//http request logging middle
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+//express middleware, parses text makes it easier to work with
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+//the mongoose Models
 require('./models/Songs'); //Our song posts model
 require('./models/Comments'); //Our song posts model
 

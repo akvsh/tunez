@@ -14,10 +14,17 @@ var SongSchema = new mongoose.Schema({
     }] //uses Mongoose's built in populate method to retreive array of Comment references
 });
 
-//update and save the number of upbeats
+//increment song post upbeats and save to db
 //cb is the callback function
 SongSchema.methods.upbeat = function (cb) {
     this.upbeats += 1;
+    this.save(cb);
+};
+
+//decrement song post upbeats and save to db
+//cb is the callback function
+SongSchema.methods.downbeat = function (cb) {
+    this.upbeats -= 1;
     this.save(cb);
 };
 

@@ -13,12 +13,18 @@ var CommentSchema = new mongoose.Schema({
     } //in reference to which song post this comment under
 });
 
-//update comment upbeats and save to db
+//increment comment upbeats and save to db
 //cb is the callback function
 CommentSchema.methods.upbeat = function (cb) {
     this.upbeats += 1;
     this.save(cb);
 };
 
+//decrement comment upbeats and save to db
+//cb is the callback function
+CommentSchema.methods.downbeat = function (cb) {
+    this.upbeats -= 1;
+    this.save(cb);
+}
 
 mongoose.model('Comment', CommentSchema);
